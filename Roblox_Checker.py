@@ -1,83 +1,118 @@
 import requests
 import re
 import tkinter as tk
-from tkinter import ttk
 import time
 import threading
 
-class RobloxUsernameChecker:
+class RayfieldInspiredChecker:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title("Roblox Username Checker")
-        self.root.geometry("500x600")
-        self.root.configure(bg="#0F1923")
-        self.root.resizable(False, False)
+        self.root.title("Sniper Hub")
+        self.root.geometry("800x600")
+        self.root.configure(bg="#14181D")
 
-        # Title
-        title = tk.Label(self.root, text="Roblox Username Checker", font=("Helvetica", 24, "bold"), fg="#00D4FF", bg="#0F1923")
-        title.pack(pady=40)
+        # Left Sidebar (Rayfield tabs)
+        self.sidebar = tk.Frame(self.root, bg="#0F1216", width=200)
+        self.sidebar.pack(side="left", fill="y")
+        self.sidebar.pack_propagate(False)
 
-        # Subtitle
-        subtitle = tk.Label(self.root, text="Check if your dream username is available", font=("Helvetica", 12), fg="#99AAB5", bg="#0F1923")
-        subtitle.pack(pady=10)
+        tk.Label(self.sidebar, text="Sniper Hub", font=("Helvetica", 16, "bold"), fg="#7289DA", bg="#0F1216").pack(pady=30)
 
-        # Input Frame
-        input_frame = tk.Frame(self.root, bg="#0F1923")
-        input_frame.pack(pady=30)
+        self.tabs = {}
+        tab_names = ["Home", "Username Checker", "Settings"]
+        for name in tab_names:
+            btn = tk.Button(self.sidebar, text=name, font=("Helvetica", 12), fg="white", bg="#0F1216", relief="flat", anchor="w", padx=30, command=lambda n=name: self.switch_tab(n))
+            btn.pack(fill="x", pady=2)
+            btn.bind("<Enter>", lambda e, b=btn: b.config(bg="#1E2228"))
+            btn.bind("<Leave>", lambda e, b=btn: b.config(bg="#0F1216"))
+            self.tabs[name] = btn
 
-        self.entry = tk.Entry(input_frame, width=40, font=("Helvetica", 14), justify="center", relief="flat", bg="#1E2A38", fg="white", insertbackground="white")
-        self.entry.pack(pady=10, ipady=12)
+        # Main content frame
+        self.content = tk.Frame(self.root, bg="#14181D")
+        self.content.pack(side="right", expand=True, fill="both", padx=20, pady=20)
+
+        # Create frames for each tab
+        self.frames = {}
+        for name in tab_names:
+            frame = tk.Frame(self.content, bg="#14181D")
+            self.frames[name] = frame
+
+        # Home Tab
+        home = self.frames["Home"]
+        tk.Label(home, text="Welcome to Sniper Hub", font=("Helvetica", 28, "bold"), fg="#7289DA", bg="#14181D").pack(pady=100)
+        tk.Label(home, text="Select a tab on the left", font=("Helvetica", 14), fg="#99AAB5", bg="#14181D").pack()
+
+        # Username Checker Tab
+        checker = self.frames["Username Checker"]
+        tk.Label(checker, text="Roblox Username Sniper", font=("Helvetica", 24, "bold"), fg="#7289DA", bg="#14181D").pack(pady=40)
+
+        self.entry = tk.Entry(checker, width=40, font=("Helvetica", 14), justify="center", bg="#23272A", fg="white", insertbackground="white")
+        self.entry.pack(pady=20, ipady=12)
         self.entry.insert(0, "Enter username...")
-        self.entry.bind("<FocusIn>", lambda e: self.entry.delete(0, tk.END) if self.entry.get() == "Enter username..." else None)
 
-        # Button with hover animation
-        self.check_button = tk.Button(input_frame, text="Check Availability", font=("Helvetica", 14, "bold"), fg="white", bg="#00D4FF", relief="flat", cursor="hand2", command=self.start_check)
-        self.check_button.pack(pady=20, ipadx=20, ipady=10)
-        self.check_button.bind("<Enter>", lambda e: self.check_button.config(bg="#00B0D4"))
-        self.check_button.bind("<Leave>", lambda e: self.check_button.config(bg="#00D4FF"))
+        self.check_button = tk.Button(checker, text="SNIPE", font=("Helvetica", 16, "bold"), fg="white", bg="#7289DA", relief="flat", command=self.start_check)
+        self.check_button.pack(pady=30, ipadx=40, ipady=15)
+        self.check_button.bind("<Enter>", lambda e: self.check_button.config(bg="#5B6EB8"))
+        self.check_button.bind("<Leave>", lambda e: self.check_button.config(bg="#7289DA"))
 
-        # Loading spinner
-        self.spinner = ttk.Label(self.root, text="", font=("Helvetica", 20), fg="#00D4FF", bg="#0F1923")
+        self.spinner = tk.Label(checker, text="", font=("Helvetica", 24), fg="#7289DA", bg="#14181D")
         self.spinner.pack(pady=20)
 
-        # Result area
-        self.result = tk.Label(self.root, text="", font=("Helvetica", 14), fg="white", bg="#0F1923", wraplength=450, justify="center")
-        self.result.pack(pady=30, expand=True)
+        self.result = tk.Label(checker, text="", font=("Helvetica", 16), fg="white", bg="#14181D", wraplength=500)
+        self.result.pack(pady=40)
 
-        # Footer
-        footer = tk.Label(self.root, text="Made with ❤️ using Python", font=("Helvetica", 10), fg="#555", bg="#0F1923")
-        footer.pack(side="bottom", pady=20)
+        # Settings Tab (placeholder)
+        settings = self.frames["Settings"]
+        tk.Label(settings, text="Settings (Coming Soon)", font=("Helvetica", 20), fg="#7289DA", bg="#14181D").pack(pady=100)
+
+        # Start on Username Checker tab
+        self.switch_tab("Username Checker")
+
+    def switch_tab(self, tab_name):
+        # Highlight selected tab
+        for name, btn in self.tabs.items():
+            if name == tab_name:
+                btn.config(bg="#7289DA", fg="white")
+            else:
+                btn.config(bg="#0F1216", fg="white")
+        
+        # Show selected frame
+        for name, frame in self.frames.items():
+            if name == tab_name:
+                frame.pack(expand=True, fill="both")
+            else:
+                frame.pack_forget()
 
     def animate_loading(self):
         dots = ["   ", ".  ", ".. ", "..."]
-        for i in range(20):
+        for i in range(25):
             if not self.checking:
                 break
-            self.spinner.config(text="Checking" + dots[i % 4])
+            self.spinner.config(text="Sniping" + dots[i % 4])
             time.sleep(0.3)
             self.root.update()
 
     def check_username(self, username):
         if not username.isalnum() or len(username) < 3 or len(username) > 20:
-            return "❌ Invalid username (3-20 letters/numbers only)"
+            return "Invalid username"
 
         url = f"https://www.roblox.com/users/profile?username={username}"
         try:
             response = requests.get(url, allow_redirects=True, timeout=10)
             if response.status_code == 404 or (response.status_code == 200 and "/users/" not in response.url):
-                return f"✅ '{username}' is AVAILABLE!\nGo claim it now!"
+                return f"'{username}' is AVAILABLE!\nClaim it NOW!"
             elif response.status_code == 200 and re.search(r"/users/\d+/profile", response.url):
                 user_id = re.search(r"/users/(\d+)/profile", response.url).group(1)
-                return f"❌ '{username}' is TAKEN\nUser ID: {user_id}"
+                return f"'{username}' is TAKEN\nUser ID: {user_id}"
             else:
-                return "⚠️ Unknown response — try again"
+                return "Unknown — try again"
         except:
-            return "⚠️ Network error — check internet"
+            return "Network error"
 
     def start_check(self):
         username = self.entry.get().strip()
-        if not username or username == "Enter username...":
-            self.result.config(text="Please enter a username", fg="#FF6B6B")
+        if not username or "..." in username:
+            self.result.config(text="Enter a username", fg="#FF5555")
             return
 
         self.checking = True
@@ -87,15 +122,14 @@ class RobloxUsernameChecker:
 
     def perform_check(self, username):
         result = self.check_username(username)
-        time.sleep(1)  # Let animation finish
+        time.sleep(1)
         self.checking = False
         self.spinner.config(text="")
-        self.result.config(text=result, fg="#00FF00" if "AVAILABLE" in result else "#FF6B6B")
+        self.result.config(text=result, fg="#50FA7B" if "AVAILABLE" in result else "#FF5555")
 
     def run(self):
         self.root.mainloop()
 
-# Run the app
 if __name__ == "__main__":
-    app = RobloxUsernameChecker()
+    app = RayfieldInspiredChecker()
     app.run()
